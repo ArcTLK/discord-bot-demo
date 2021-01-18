@@ -39,11 +39,11 @@ client.on('message', msg => {
                         discriminator: msg.author.discriminator
                     },
                     createdTimestamp: msg.createdTimestamp,
-                    status: 'New'
+                    status: 'Considering'
                 })
                 .write();
             
-            msg.reply(`Hey, thanks for your suggestion! I will alert the admins about the same asap :)`);
+            msg.reply(`Hey, thanks for your suggestion!`);
         }
         else if (args[0] === 'list') {
             let suggestions = data.get('suggestions');
@@ -59,25 +59,29 @@ client.on('message', msg => {
 
             if (suggestions.size() > 0) {
                 msg.channel.send(`\`\`\`${suggestions.map((x, i) => {
-                    return `${i + 1}. ${x.user.username}#${x.user.discriminator} [${DateTime.fromMillis(x.createdTimestamp).toFormat('d LLL, h:mm a')}]: ${x.suggestion}`;
+                    return `${i + 1}. ${x.user.username}#${x.user.discriminator} [${DateTime.fromMillis(x.createdTimestamp).toFormat('d LLL, h:mm a')}]: ${x.suggestion}\nStatus: ${x.status}`;
                 }).join('\n')}\`\`\``);
             }
             else {
                 msg.channel.send('No suggestions found!');
             }
         }
-        else if (args[0] === 'accept') {
+        else if (args[0] === 'accept' || args[0] === 'reject' || args[0] === 'complete' || args[0] === 'consider') {
             if (!data.get('admins').map(x => x.id).includes(msg.author.id).value()) {
                 return msg.reply('You are not an admin!');
             }
 
-            const index = parseInt(args[1]);
+            const index = parseInt(args[1]) - 1;
             const suggestions = data.get('suggestions');
-            if (suggestions.size() >= index || suggestions.size() < 0) {
+            
+            if (index >= suggestions.size() || index < 0) {
                 return msg.reply('Invalid suggestion!');
             }
-            // TODO: change status of suggestion
-            
+
+            const suggestion = suggestions.get(`[${index}]`).value();
+            suggestion.status = args[0] === 'accept' ? 'Accepted' : args[0] === 'reject' ? 'Rejected' : args[0] === 'complete' ? 'Completed' : 'Considering';
+            suggestions.write();
+            msg.reply(`The suggestion **${suggestion.suggestion}** has been ${args[0] === 'accept' ? 'accepted' : args[0] === 'reject' ? 'rejected' : args[0] === 'complete' ? 'completed' : 'set as under consideration'}!`);
         }
         else if (args[0] === 'id') {
             msg.reply(`Your id is ${msg.author.id}`);

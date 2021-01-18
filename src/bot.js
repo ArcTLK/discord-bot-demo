@@ -1,6 +1,5 @@
 require('dotenv').config();
-const { DateTime } = require("luxon");
-const _ = require('lodash');
+const { DateTime } = require('luxon');
 
 const Discord = require('discord.js');
 const client = new Discord.Client();

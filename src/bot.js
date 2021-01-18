@@ -86,6 +86,9 @@ client.on('message', msg => {
         else if (args[0] === 'id') {
             msg.reply(`Your id is ${msg.author.id}`);
         }
+        else {
+            msg.reply(`Sorry, I don't recognize the command: **${args[0]}**`)
+        }
     }
 });
 
